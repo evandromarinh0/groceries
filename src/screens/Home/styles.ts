@@ -43,3 +43,16 @@ export const ClearButtonText = styled.Text`
   font-weight: 600;
   color: #828282;
 `;
+
+export const Separator = styled.View`
+  width: 100%;
+  height: 1px;
+  background: #eef0f5;
+  margin: 16px 0;
+`;
+
+export const EmptyText = styled.Text`
+  font-size: 14px;
+  color: #808080;
+  text-align: center;
+`;
