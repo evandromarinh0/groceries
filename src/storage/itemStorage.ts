@@ -1,0 +1,46 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const storageKey = "@comprar:items";
+
+export interface ItemStorage {
+  id:string;
+  description: string;
+  status: string;
+}
+
+async function get(): Promise<ItemStorage[]>{
+  try {
+    const storage = await AsyncStorage.getItem(storageKey);
+
+    return storage ? JSON.parse(storage) : [];
+  } catch (e) {
+    throw new Error("GET_ITEMS: " + e)
+  }
+}
+
+async function getByStatus(status: string): Promise<ItemStorage[]>{
+  const items = await get();
+  return items.filter(item => item.status === status)
+}
+
+async function save(items: ItemStorage[]): Promise<void>{
+  try {
+    await AsyncStorage.setItem(storageKey, JSON.stringify(items))
+  } catch (e) {
+    throw new Error("ITEMS_SAVE: " + e)
+  }
+}
+
+async function add(newItem: ItemStorage): Promise<ItemStorage[]>{
+  const items = await get();
+  const updatedItems = [...items, newItem]
+  await save(updatedItems);
+
+  return updatedItems;
+}
+
+export const itemsStorage = {
+  get,
+  getByStatus,
+  add
+}

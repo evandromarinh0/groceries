@@ -1,45 +1,59 @@
-import { FlatList, Image } from "react-native";
+import { Alert, FlatList, Image } from "react-native";
 import { ClearButton, ClearButtonText, Container, Content, ContentWrapper, EmptyText, FilterWrapper, Separator } from "./styles";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { Filter } from "../../components/Filter";
+import { Item } from "../../components/Item";
+import { useEffect, useState } from "react";
+import { itemsStorage, ItemStorage } from "../../storage/itemStorage";
 
 import logoImg from '../../assets/logo.png';
-import { Item } from "../../components/Item";
+
+
 
 export default function HomePage(){
-  const list = [
-  {
-    id: '1',
-    status: 'done',
-    description: '1 pacote de café'
-  },
-  {
-    id: '1',
-    status: 'pending',
-    description: '1 pacote de açucar'
-  },
-  {
-    id: '1',
-    status: 'pending',
-    description: '1 pacote de feijão'
-  },
-]
+  const [filter, setFilter] = useState("pending");
+  const [inputText, setInputText] = useState("");
+  const [list, setList] = useState<ItemStorage[]>()
 
+  function handleFilters(value: string){
+    setFilter(value)
+  }
 
+  async function handleAddItem() {
+    if (!inputText.trim()){
+      return Alert.alert("Adicionar", "Informe a descrição para adicionar.")
+    }
+
+    const newItem = {
+      id: Math.random().toString(36).substring(2),
+      description: inputText,
+      status: "pending"
+    }
+
+    await itemsStorage.add(newItem);
+    Alert.alert("Adicionado", `Adicionado ${inputText}`)
+    setFilter("pending");
+    setInputText("");
+  }
+
+  useEffect(() => {
+    itemsStorage.getByStatus(filter).then(response => setList(response));
+  }, [filter])
+  
   return(
     <Container>
       <Image source={logoImg} height={34} width={134} resizeMode="contain"  />
 
       <ContentWrapper>
-        <Input placeholder="O que precisa comprar?" placeholderTextColor="#74798b" />
-        <Button title="Adicionar" />
+        <Input value={inputText} onChangeText={setInputText} placeholder="O que precisa comprar?" placeholderTextColor="#74798b" />
+        <Button onPress={handleAddItem} title="Adicionar" />
       </ContentWrapper>
 
       <Content>
         <FilterWrapper>
-          <Filter status="pending" isActive={false} />
-          <Filter status="done" isActive={true} />
+          <Filter status="pending" isActive={filter === "pending"} onClick={() => handleFilters("pending")} />
+          <Filter status="done" isActive={filter === "done"} onClick={() => handleFilters("done")} />
 
           <ClearButton>
             <ClearButtonText>Limpar</ClearButtonText>
@@ -52,10 +66,12 @@ export default function HomePage(){
           ItemSeparatorComponent={() => <Separator />}
           ListEmptyComponent={() => <EmptyText>Nenhum item aqui.</EmptyText>}
           data={list}
-          renderItem={({item}) => (
-            <Item status={item.status} description={item.description} />
-          )}
-          keyExtractor={(item => item.description)}
+          renderItem={({item}) => {
+            return(
+              <Item status={item.status} description={item.description} />
+            );
+          }}
+          keyExtractor={(item => item.id)}
         />
       </Content>
     </Container>
