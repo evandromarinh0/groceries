@@ -7,6 +7,7 @@ interface ItemProps {
   description: string;
   hasSeparator?: boolean;
   onRemove: () => void;
+  onToggle: () => void;
 }
 
 export function Item(props: ItemProps){
@@ -15,7 +16,7 @@ export function Item(props: ItemProps){
     {props.hasSeparator && <Separator />}
 
     <Container>
-      <ItemButton>
+      <ItemButton onPress={() => props.onToggle()}>
         {props.status === 'pending' ? <CircleDashed size={18} color="#1e1e1e" /> : <CircleCheck size={18} color={"#2c46b1"} />}
         <ItemDescription>{props.description}</ItemDescription>
       </ItemButton>

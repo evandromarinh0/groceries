@@ -42,6 +42,16 @@ export default function HomePage(){
     getItemsByStatus();
   }
 
+  async function handleToggleStatus(id: string) {
+    try {
+      await itemsStorage.toggleStatus(id);
+      getItemsByStatus();
+    } catch (e) {
+      console.log(e);
+      Alert.alert("Erro", "Não foi possível atualizar o status")
+    }
+  }
+
   async function handleRemoveItem(id: string) {
     try {
       await itemsStorage.remove(id);
@@ -80,7 +90,7 @@ export default function HomePage(){
 
       <ContentWrapper>
         <Input value={inputText} onChangeText={setInputText} placeholder="O que precisa comprar?" placeholderTextColor="#74798b" />
-        <Button onPress={handleAddItem} title="Adicionar" />
+        <Button onPress={handleAddItem} title="Adicionar" inputLength={inputText.length} />
       </ContentWrapper>
 
       <Content>
@@ -101,7 +111,7 @@ export default function HomePage(){
           data={list}
           renderItem={({item}) => {
             return(
-              <Item status={item.status} description={item.description} onRemove={() => handleRemoveItem(item.id)} />
+              <Item status={item.status} description={item.description} onRemove={() => handleRemoveItem(item.id)} onToggle={() => handleToggleStatus(item.id)} />
             );
           }}
           keyExtractor={(item => item.id)}
