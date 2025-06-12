@@ -6,6 +6,7 @@ interface ItemProps {
   status: string;
   description: string;
   hasSeparator?: boolean;
+  onRemove: () => void;
 }
 
 export function Item(props: ItemProps){
@@ -19,7 +20,7 @@ export function Item(props: ItemProps){
         <ItemDescription>{props.description}</ItemDescription>
       </ItemButton>
 
-      <ItemButton>
+      <ItemButton onPress={() => props.onRemove()}>
         <Trash2 size={18} color="#828282" />
       </ItemButton>
     </Container>

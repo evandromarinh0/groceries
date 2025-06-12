@@ -20,6 +20,10 @@ export default function HomePage(){
     setFilter(value)
   }
 
+  async function getItemsByStatus(){
+    await itemsStorage.getByStatus(filter).then(response => setList(response));
+  }
+
   async function handleAddItem() {
     if (!inputText.trim()){
       return Alert.alert("Adicionar", "Informe a descrição para adicionar.")
@@ -33,12 +37,41 @@ export default function HomePage(){
 
     await itemsStorage.add(newItem);
     Alert.alert("Adicionado", `Adicionado ${inputText}`)
-    setFilter("pending");
+    filter !== "pending" && setFilter("pending");
     setInputText("");
+    getItemsByStatus();
+  }
+
+  async function handleRemoveItem(id: string) {
+    try {
+      await itemsStorage.remove(id);
+      getItemsByStatus();
+    } catch (e) {
+      console.log(e);
+      Alert.alert("Erro", "Não foi possível remover o item")
+    }
+
+  }
+
+  async function onClear(){
+    try {
+      itemsStorage.clear();
+      setList([]);
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Erro", "Não foi possível remover todos os itens");
+    }
+  }
+
+  function handleClear() {
+    Alert.alert("Limpar", "Deseja remover todos?", [
+      { text: "Não", style: "cancel" },
+      { text: "Sim", onPress: () => onClear()},
+    ]);
   }
 
   useEffect(() => {
-    itemsStorage.getByStatus(filter).then(response => setList(response));
+    getItemsByStatus();
   }, [filter])
   
   return(
@@ -55,7 +88,7 @@ export default function HomePage(){
           <Filter status="pending" isActive={filter === "pending"} onClick={() => handleFilters("pending")} />
           <Filter status="done" isActive={filter === "done"} onClick={() => handleFilters("done")} />
 
-          <ClearButton>
+          <ClearButton onPress={handleClear}>
             <ClearButtonText>Limpar</ClearButtonText>
           </ClearButton>
         </FilterWrapper>
@@ -68,7 +101,7 @@ export default function HomePage(){
           data={list}
           renderItem={({item}) => {
             return(
-              <Item status={item.status} description={item.description} />
+              <Item status={item.status} description={item.description} onRemove={() => handleRemoveItem(item.id)} />
             );
           }}
           keyExtractor={(item => item.id)}
